@@ -1,6 +1,6 @@
-# Approaches on Contextual Modelling for Conversational TTS
+# Contextual Modelling for Conversational TTS
 
-**Abstract:** This repo re-implements the model architecture from recent research studies that have proposed dialogue context modelling methods for predicting context-appropriate prosody for conversational turns within a dialogue.
+**Abstract:** This repo re-implements the model architecture from recent research studies that have proposed dialogue context modelling methods for predicting context-appropriate prosody for conversational turns within a dialogue. Assumes the data is multi-speaker - limit to 2 speakers for now
 
 <table>
   <tr>
@@ -19,7 +19,7 @@
   </tr>
   <tr>
     <td>Acoustic Context Encoder</td>
-    <td>BERT encodings + GRU</td>
+    <td>Acoustic Embedding (Reference Enconder)</td>
     <td>"ACE"</td>
     <td>Done</td>
     <td>[Paper](https://arxiv.org/pdf/2005.10438.pdf)</td>
@@ -40,11 +40,11 @@
   </tr>
 </table>
 
-# Dataset
+## Dataset
 
 Use DailyTalk data - which can be accessd here You can download our [dataset](https://drive.google.com/drive/folders/1WRt-EprWs-2rmYxoWYT9_13omlhDHcaL).
 
-# Pretrained Models
+## Pretrained Models
 
 You can download the pretrained model for the graphical model here[here]().
 
@@ -55,14 +55,14 @@ Toggle the type of contextual method by
 history_encoder:
   type: "Guo" # ["none", "Guo"]
 context_encoder:
-  type: "none" # ["none", "Guo", "ACE", "StyleToken", "DialogCGN", "Cross-Modal"]
-gst:
-  type: "none" # ["gst", "wst"]
+  type: "none" # ["none", "Guo", "ACE", "DialogCGN", "Cross-Modal"]
+style-tokens:
+  type: "none" # ["gst", "gst+wst"]
 ```
 
-# Quickstart
+## Quickstart
 
-## Dependencies
+### Dependencies
 
 You can install the Python dependencies with
 
@@ -70,17 +70,19 @@ You can install the Python dependencies with
 pip3 install -r requirements.txt
 ```
 
-## Inference
+### Inference
 
-See Samples here [ConversationalTTS](https://github.com/keonlee9420/STYLER)
-
-# Training
-
-## Data Preparation
+See samples here [ConversationalTTS](https://github.com/keonlee9420/STYLER)
 
 ## Training
 
-Train your model with
+### Data Preparation
+
+Dataloader
+
+### Training
+
+Train your model with. To choose a model toggle the options here
 
 ```
 python3 train.py --dataset DailyTalk
@@ -89,6 +91,12 @@ python3 train.py --dataset DailyTalk
 # Notes
 
 - Updated the Dataloader to other features from the dialogue context
+
+## TTS Papers
+
+- [Controllable Context-aware Conversational Speech Synthesis](https://arxiv.org/pdf/2106.10828.pdf?utm_source=summari)
+- [CONVERSATIONAL END-TO-END TTS FOR VOICE AGENTS](https://arxiv.org/pdf/2005.10438.pdf)
+- [ENHANCING SPEAKING STYLES IN CONVERSATIONAL TEXT-TO-SPEECH SYNTHESIS WITH GRAPH-BASED MULTI-MODAL CONTEXT MODELING](https://arxiv.org/pdf/2106.06233.pdf)
 
 ## Model References
 

@@ -1,5 +1,7 @@
 block_type: "transformer"
 external_speaker_dim: 512
+context_method_model: "Guo"
+style_tokens: "GST" #["none", "GST", "WST"]
 
 duration_modeling:
   learn_alignment: True
@@ -21,7 +23,7 @@ history_encoder:
   cma_filter_size: 256
   cma_kernel_size: [9, 1]
   cma_dropout: 0.2
-  context_layer: 2 
+  context_layer: 2
   context_hidden: 128
   context_dropout: 0.2
 

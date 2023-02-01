@@ -16,6 +16,7 @@ class CompTransTTS(nn.Module):
         super(CompTransTTS, self).__init__()
         self.model_config = model_config
 
+        # -------------------------------------------------------------------
         if model_config["block_type"] == "transformer":
             from .transformers.transformer import TextEncoder, Decoder
         # elif model_config["block_type"] == "lstransformer":
@@ -27,10 +28,41 @@ class CompTransTTS(nn.Module):
         # elif model_config["block_type"] == "reformer":
         #     from .transformers.reformer import TextEncoder, Decoder
         else:
-            raise ValueError("Unsupported Block Type: {}".format(model_config["block_type"]))
+            raise ValueError("Unsupported Block Type: {}".format(
+                model_config["block_type"]))
+        # -------------------------------------------------------------------
+
+        # -------------------------------------------------------------------
+        if model_config["context_method_model"] == "Guo":
+            #from .contextualmethods.guo import ConversationalContextEncoder
+            self.context_encoder = ConversationalContextEncoder(
+                preprocess_config, model_config)
+        # elif model_config["context_method_model"] == "ACE":
+        #    from .contextualmethods.ace import ConversationalContextEncoder
+        # elif model_config["context_method_model"] == "Cross-attnmodal":
+        #    from .contextualmethods.ace import ConversationalContextEncoder
+        # elif model_config["context_method_model"] == "proposed":
+        #    from .contextualmethods.proposed_discourseaware import ConversationalContextEncoder
+        else:
+            raise ValueError("Unsupported Context Modelling Type Type: {}".format(
+                model_config["context_method_model"]))
+        # -------------------------------------------------------------------
+
+        # -------------------------------------------------------------------
+        if model_config["style_tokens"] == "gst":
+            from .styleembeddings.gst import GST_StyleEncoder
+            self.mel_style_encoder = GST_StyleEncoder()
+
+        # elif model_config["style_tokens"] == "wst":
+        #    from .styleembeddings.gst import StyleEnconder
+        else:
+            raise ValueError("Unsupported Block Type: {}".format(
+                model_config["style_tokens"]))
+        # -------------------------------------------------------------------
 
         self.encoder = TextEncoder(model_config)
-        self.variance_adaptor = VarianceAdaptor(preprocess_config, model_config, train_config)
+        self.variance_adaptor = VarianceAdaptor(
+            preprocess_config, model_config, train_config)
         self.decoder = Decoder(model_config)
         self.mel_linear = nn.Linear(
             model_config["transformer"]["decoder_hidden"],
@@ -71,10 +103,12 @@ class CompTransTTS(nn.Module):
                 model_config["transformer"]["encoder_hidden"],
             )
         self.history_type = model_config["history_encoder"]["type"]
+        self.style_token_type = model_config["style_tokens"]
 
         if self.history_type != "none":
             if self.history_type == "Guo":
-                self.context_encoder = ConversationalContextEncoder(preprocess_config, model_config)
+                self.context_encoder = ConversationalContextEncoder(
+                    preprocess_config, model_config)
 
     def forward(
         self,
@@ -106,6 +140,12 @@ class CompTransTTS(nn.Module):
 
         texts, text_embeds = self.encoder(texts, src_masks)
 
+        # Style Encodings
+        if self.style_token_type != "none":
+            if self.style_token_type == "GST":
+                gst = self.mel_style_encoder(mels, max_src_len)
+                texts = texts + gst
+
         # Context Encoding
         context_encodings = None
         if self.history_type != "none":
@@ -128,10 +168,10 @@ class CompTransTTS(nn.Module):
         speaker_embeds = None
         if self.speaker_emb is not None:
             if self.embedder_type == "none":
-                speaker_embeds = self.speaker_emb(speakers) # [B, H]
+                speaker_embeds = self.speaker_emb(speakers)  # [B, H]
             else:
                 assert spker_embeds is not None, "Speaker embedding should not be None"
-                speaker_embeds = self.speaker_emb(spker_embeds) # [B, H]
+                speaker_embeds = self.speaker_emb(spker_embeds)  # [B, H]
 
         emotion_embeds = None
         if self.emotion_emb is not None:
